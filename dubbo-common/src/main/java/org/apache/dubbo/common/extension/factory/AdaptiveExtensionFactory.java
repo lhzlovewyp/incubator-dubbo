@@ -33,6 +33,10 @@ public class AdaptiveExtensionFactory implements ExtensionFactory {
     private final List<ExtensionFactory> factories;
 
     public AdaptiveExtensionFactory() {
+        // 把配置文件org.apache.dubbo.common.extension.ExtensionFactory中的实现类全部加载到factories中.
+        //adaptive=org.apache.dubbo.common.extension.factory.AdaptiveExtensionFactory
+        //spi=org.apache.dubbo.common.extension.factory.SpiExtensionFactory
+        // spring=org.apache.dubbo.config.spring.extension.SpringExtensionFactory
         ExtensionLoader<ExtensionFactory> loader = ExtensionLoader.getExtensionLoader(ExtensionFactory.class);
         List<ExtensionFactory> list = new ArrayList<ExtensionFactory>();
         for (String name : loader.getSupportedExtensions()) {

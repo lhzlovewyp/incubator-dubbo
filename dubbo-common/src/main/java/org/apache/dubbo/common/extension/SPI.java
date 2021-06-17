@@ -24,6 +24,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
+ * 扩展点注解,接口上加了此注解才可以使用dubbo的spi机制.
  * Marker for extension interface
  * <p/>
  * Changes on extension configuration file <br/>

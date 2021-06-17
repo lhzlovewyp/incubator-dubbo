@@ -31,6 +31,8 @@ import org.apache.dubbo.rpc.RpcException;
 import java.util.List;
 
 /**
+ *
+ * 协议包装类.
  * ListenerProtocol
  */
 public class ProtocolFilterWrapper implements Protocol {

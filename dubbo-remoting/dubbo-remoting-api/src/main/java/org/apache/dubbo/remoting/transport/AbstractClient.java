@@ -37,7 +37,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * AbstractClient
+ * AbstractClient 客户端抽象类.
  */
 public abstract class AbstractClient extends AbstractEndpoint implements Client {
 
@@ -86,7 +86,7 @@ public abstract class AbstractClient extends AbstractEndpoint implements Client 
         ExtensionLoader.getExtensionLoader(DataStore.class)
                 .getDefaultExtension().remove(Constants.CONSUMER_SIDE, Integer.toString(url.getPort()));
     }
-
+    // 对ChannelHandler进行包装，给url中添加线程名和线程池类型,默认为cache.
     protected static ChannelHandler wrapChannelHandler(URL url, ChannelHandler handler) {
         url = ExecutorUtil.setThreadName(url, CLIENT_THREAD_POOL_NAME);
         url = url.addParameterIfAbsent(Constants.THREADPOOL_KEY, Constants.DEFAULT_CLIENT_THREADPOOL);

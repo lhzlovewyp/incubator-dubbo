@@ -25,6 +25,10 @@ import org.apache.dubbo.remoting.RemotingException;
 
 /**
  * AbstractPeer
+ * AbstractPeer抽象类实现了端点接口-Endpoint 和 通道处理器接口-ChannelHandler，Server 与 Client 的具体实现 会继承AbstractPeer
+ * AbstractPeer主要是维护着 URL 与 ChannelHandler 的关系，
+ * 然后将 通道-Channel 和 消息msg 交给 ChannelHandler 处理(装饰模式)，同时还实现了 端点关闭的判断功能
+ * 具备了发送数据的功能.
  */
 public abstract class AbstractPeer implements Endpoint, ChannelHandler {
 

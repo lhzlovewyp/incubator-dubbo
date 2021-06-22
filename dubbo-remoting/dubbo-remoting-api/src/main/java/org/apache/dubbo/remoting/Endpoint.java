@@ -21,6 +21,9 @@ import org.apache.dubbo.common.URL;
 import java.net.InetSocketAddress;
 
 /**
+ *
+ * dubbo中抽象出了一个端的结点概念，端就是一个点，点对点之间是可以双向通信
+ * 在端的基础上，再衍生出了通道-Channel、客户端-Client以及服务端-Server的概念。
  * Endpoint. (API/SPI, Prototype, ThreadSafe)
  *
  *
@@ -32,28 +35,28 @@ public interface Endpoint {
 
     /**
      * get url.
-     *
+     * 获取端的url对象
      * @return url
      */
     URL getUrl();
 
     /**
      * get channel handler.
-     *
+     * 获取端的通道处理器
      * @return channel handler
      */
     ChannelHandler getChannelHandler();
 
     /**
      * get local address.
-     *
+     * 获取端的本地地址
      * @return local address.
      */
     InetSocketAddress getLocalAddress();
 
     /**
      * send message.
-     *
+     * 发送消息
      * @param message
      * @throws RemotingException
      */
@@ -68,19 +71,19 @@ public interface Endpoint {
     void send(Object message, boolean sent) throws RemotingException;
 
     /**
-     * close the channel.
+     * close the channel. 关闭通道
      */
     void close();
 
     /**
-     * Graceful close the channel.
+     * Graceful close the channel. 优雅关闭通道
      */
     void close(int timeout);
-
+    // 开始关闭
     void startClose();
 
     /**
-     * is closed.
+     * is closed. 是否已关闭
      *
      * @return closed
      */

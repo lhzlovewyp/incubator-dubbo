@@ -57,6 +57,9 @@ import java.util.Properties;
 import static org.apache.dubbo.common.utils.NetUtils.isInvalidLocalHost;
 
 /**
+ *
+ *  consumer端接口代理类.
+ *
  * ReferenceConfig
  *
  * @export
@@ -79,12 +82,14 @@ public class ReferenceConfig<T> extends AbstractReferenceConfig {
      * Actually，when the {@link ExtensionLoader} init the {@link Protocol} instants,it will automatically wraps two
      * layers, and eventually will get a <b>ProtocolFilterWrapper</b> or <b>ProtocolListenerWrapper</b>
      */
+    // 动态自适应协议实现类.
     private static final Protocol refprotocol = ExtensionLoader.getExtensionLoader(Protocol.class).getAdaptiveExtension();
 
     /**
      * The {@link Cluster}'s implementation with adaptive functionality, and actually it will get a {@link Cluster}'s
      * specific implementation who is wrapped with <b>MockClusterInvoker</b>
      */
+    // 集群自适应实现类.
     private static final Cluster cluster = ExtensionLoader.getExtensionLoader(Cluster.class).getAdaptiveExtension();
 
     /**
@@ -99,12 +104,12 @@ public class ReferenceConfig<T> extends AbstractReferenceConfig {
     private final List<URL> urls = new ArrayList<URL>();
 
     /**
-     * The interface name of the reference service
+     * The interface name of the reference service 代理的接口名称.
      */
     private String interfaceName;
 
     /**
-     * The interface class of the reference service
+     * The interface class of the reference service  代理类
      */
     private Class<?> interfaceClass;
     
@@ -221,6 +226,7 @@ public class ReferenceConfig<T> extends AbstractReferenceConfig {
     }
 
     public synchronized T get() {
+        // 检查和更新配置项.
         checkAndUpdateSubConfigs();
 
         if (destroyed) {
@@ -254,18 +260,24 @@ public class ReferenceConfig<T> extends AbstractReferenceConfig {
             return;
         }
         initialized = true;
+        // 检查接口是否有本地实现.
         checkStubAndLocal(interfaceClass);
+        // 检查mock配置.
         checkMock(interfaceClass);
         Map<String, String> map = new HashMap<String, String>();
 
         map.put(Constants.SIDE_KEY, Constants.CONSUMER_SIDE);
+        // map里面增加运行时参数，如dubbo 版本号、时间戳、pid等等.
         appendRuntimeParameters(map);
+        // 判断是否泛化调用.
         if (!isGeneric()) {
             String revision = Version.getVersion(interfaceClass, version);
             if (revision != null && revision.length() > 0) {
                 map.put("revision", revision);
             }
 
+            // 把接口中的所有可调用方法拼接成字符串放入参数methods中.
+            // Wrapper.getWrapper 构建一个包装类.
             String[] methods = Wrapper.getWrapper(interfaceClass).getMethodNames();
             if (methods.length == 0) {
                 logger.warn("No method found in service interface " + interfaceClass.getName());
@@ -274,12 +286,18 @@ public class ReferenceConfig<T> extends AbstractReferenceConfig {
                 map.put("methods", StringUtils.join(new HashSet<String>(Arrays.asList(methods)), ","));
             }
         }
+        // 接口名称放入map中.
         map.put(Constants.INTERFACE_KEY, interfaceName);
+        // 应用级别配置放入map中。
         appendParameters(map, application);
+        // 模块级别的配置放入map中
         appendParameters(map, module);
+        // consumer级别的配置放入map中.
         appendParameters(map, consumer, Constants.DEFAULT_KEY);
+        // reference级别的配置放入map中.
         appendParameters(map, this);
         Map<String, Object> attributes = null;
+        // 接口的配置最小粒度可以到方法级别，方法级别的配置会覆盖上次的配置.
         if (CollectionUtils.isNotEmpty(methods)) {
             attributes = new HashMap<String, Object>();
             for (MethodConfig methodConfig : methods) {
@@ -295,6 +313,7 @@ public class ReferenceConfig<T> extends AbstractReferenceConfig {
             }
         }
 
+        // 获取往注册中心注册的ip地址,没有取到就取本机ip地址.
         String hostToRegistry = ConfigUtils.getSystemProperty(Constants.DUBBO_IP_TO_REGISTRY);
         if (StringUtils.isEmpty(hostToRegistry)) {
             hostToRegistry = NetUtils.getLocalHost();
@@ -302,7 +321,7 @@ public class ReferenceConfig<T> extends AbstractReferenceConfig {
             throw new IllegalArgumentException("Specified invalid registry ip from property:" + Constants.DUBBO_IP_TO_REGISTRY + ", value:" + hostToRegistry);
         }
         map.put(Constants.REGISTER_IP_KEY, hostToRegistry);
-
+        // 创建代理类.
         ref = createProxy(map);
 
         ConsumerModel consumerModel = new ConsumerModel(getUniqueServiceName(), interfaceClass, ref, interfaceClass.getMethods(), attributes);
@@ -337,12 +356,12 @@ public class ReferenceConfig<T> extends AbstractReferenceConfig {
                     for (String u : us) {
                         URL url = URL.valueOf(u);
                         if (StringUtils.isEmpty(url.getPath())) {
-                            url = url.setPath(interfaceName);
+                            url = url.setPath(interfaceName); // dubbo 接口地址url中增加接口路径  dubbo://127.0.0.1:12345/org.apache.dubbo.demo.DemoService
                         }
                         if (Constants.REGISTRY_PROTOCOL.equals(url.getProtocol())) {
                             urls.add(url.addParameterAndEncoded(Constants.REFER_KEY, StringUtils.toQueryString(map)));
                         } else {
-                            urls.add(ClusterUtils.mergeUrl(url, map));
+                            urls.add(ClusterUtils.mergeUrl(url, map)); // url参数合并覆盖，构建出新的url地址，如dubbo://127.0.0.1:12345/org.apache.dubbo.demo.DemoService?application=dubbo-annotation-consumer&check=true&default.check=true&default.init=false&default.injvm=false&default.lazy=false&default.sticky=false&dubbo=2.0.2&group=&init=false&injvm=false&interface=org.apache.dubbo.demo.DemoService&lazy=false&methods=sayHello&pid=1574&register.ip=192.168.111.217&revision=2.5.8&side=consumer&sticky=false&timestamp=1623984830247&version=2.5.8
                         }
                     }
                 }

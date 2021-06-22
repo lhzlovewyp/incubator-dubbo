@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+// 简单的数据存储模型，map嵌套map的格式. ConcurrentMap<String, ConcurrentMap<String, Object>>
 public class SimpleDataStore implements DataStore {
 
     // <component name or id, <data-name, data-value>>

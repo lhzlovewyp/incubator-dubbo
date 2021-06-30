@@ -94,10 +94,12 @@ public abstract class FailbackRegistry extends AbstractRegistry {
     }
 
     private void addFailedRegistered(URL url) {
+        // 已经有重试任务，就直接返回.
         FailedRegisteredTask oldOne = failedRegistered.get(url);
         if (oldOne != null) {
             return;
         }
+        // 创建重试任务.
         FailedRegisteredTask newTask = new FailedRegisteredTask(url, this);
         oldOne = failedRegistered.putIfAbsent(url, newTask);
         if (oldOne == null) {
@@ -224,6 +226,7 @@ public abstract class FailbackRegistry extends AbstractRegistry {
     @Override
     public void register(URL url) {
         super.register(url);
+        // 删除重试任务.
         removeFailedRegistered(url);
         removeFailedUnregistered(url);
         try {
@@ -247,6 +250,7 @@ public abstract class FailbackRegistry extends AbstractRegistry {
             }
 
             // Record a failed registration request to a failed list, retry regularly
+            // 添加注册的重试任务.
             addFailedRegistered(url);
         }
     }

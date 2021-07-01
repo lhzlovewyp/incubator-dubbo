@@ -160,7 +160,9 @@ public class RegistryProtocol implements Protocol {
     }
 
     public void unregister(URL registryUrl, URL registeredProviderUrl) {
+      // 先获取对应的注册中心.
         Registry registry = registryFactory.getRegistry(registryUrl);
+        // 删除注册中心上对应的provider结点.
         registry.unregister(registeredProviderUrl);
     }
 
@@ -193,7 +195,7 @@ public class RegistryProtocol implements Protocol {
         //to judge if we need to delay publish
         boolean register = registeredProviderUrl.getParameter("register", true);
         if (register) {
-            // 像注册中心注册.
+            // 向注册中心注册.
             register(registryUrl, registeredProviderUrl);
             providerInvokerWrapper.setReg(true);
         }

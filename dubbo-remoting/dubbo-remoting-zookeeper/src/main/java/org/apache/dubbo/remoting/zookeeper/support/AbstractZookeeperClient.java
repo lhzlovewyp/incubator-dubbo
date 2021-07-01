@@ -50,6 +50,8 @@ public abstract class AbstractZookeeperClient<TargetChildListener> implements Zo
         return url;
     }
 
+    // zk上创建结点，按照path创建对应的树形结点
+    //  ephemeral 是否创建临时结点.
     @Override
     public void create(String path, boolean ephemeral) {
         if (!ephemeral) {
@@ -57,7 +59,7 @@ public abstract class AbstractZookeeperClient<TargetChildListener> implements Zo
                 return;
             }
         }
-        // 递归在zk上创建路径节点.
+        // 递归在zk上创建路径节点.父亲结点均为永久结点，叶子结点为临时结点.
         int i = path.lastIndexOf('/');
         if (i > 0) {
             create(path.substring(0, i), false);
